@@ -95,7 +95,7 @@
             background: var(--bg-sidebar);
             z-index: 999;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-            padding-bottom: env(safe-area-inset-bottom); /* Wsparcie dla pasków iPhone */
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .mobile-nav-list {
             display: flex;
@@ -179,6 +179,7 @@
 
         .badge { padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
         .badge-1 { background: #e0f2fe; color: #0369a1; }
+        .badge-1-2 { background: #fef3c7; color: #b45309; }
         .badge-2 { background: #fef3c7; color: #d97706; }
         .badge-3 { background: #f3e8ff; color: #7e22ce; }
         .badge-uw { background: #dcfce7; color: #15803d; }
@@ -208,64 +209,25 @@
         .chart-wrapper { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; padding: 20px; box-shadow: var(--shadow-md); margin-top: 20px; }
         .empty-state { text-align: center; padding: 30px; color: var(--text-muted); font-weight: 500; grid-column: 1 / -1; }
 
-        /* ========================================================================== */
-        /* --- WYMUSZONY WYGLĄD TELEFONU (AUTOMATYCZNY LUB WYBRANY PRZEŁĄCZNIKIEM) --- */
-        /* ========================================================================== */
+        /* --- MOBILE LAYOUT ENHANCEMENTS --- */
         body.mobile-mode {
             flex-direction: column;
-            padding-bottom: 80px; /* Miejsce na dolny pasek nawigacyjny */
+            padding-bottom: 80px;
         }
-        body.mobile-mode .sidebar {
-            display: none !important;
-        }
-        body.mobile-mode .mobile-nav {
-            display: block !important;
-        }
-        body.mobile-mode .main-content {
-            margin-left: 0 !important;
-            padding: 16px !important;
-            width: 100% !important;
-        }
-        body.mobile-mode .top-navbar {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        body.mobile-mode .page-title h1 {
-            font-size: 1.5rem;
-        }
-        body.mobile-mode .search-input {
-            width: 100%;
-        }
-        body.mobile-mode .dashboard-grid {
-            grid-template-columns: 1fr; /* Karta na całą szerokość ekranu telefonu */
-            gap: 16px;
-        }
-        body.mobile-mode .controls-bar {
-            padding: 14px;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-        }
-        body.mobile-mode .premium-select {
-            min-width: 100%;
-        }
-        body.mobile-mode .filter-tabs {
-            width: 100%;
-            justify-content: space-between;
-        }
-        body.mobile-mode .filter-tab {
-            flex: 1;
-            text-align: center;
-            padding: 8px 4px;
-            font-size: 0.8rem;
-        }
+        body.mobile-mode .sidebar { display: none !important; }
+        body.mobile-mode .mobile-nav { display: block !important; }
+        body.mobile-mode .main-content { margin-left: 0 !important; padding: 16px !important; width: 100% !important; }
+        body.mobile-mode .top-navbar { flex-direction: column; align-items: flex-start; }
+        body.mobile-mode .page-title h1 { font-size: 1.5rem; }
+        body.mobile-mode .search-input { width: 100%; }
+        body.mobile-mode .dashboard-grid { grid-template-columns: 1fr; gap: 16px; }
+        body.mobile-mode .controls-bar { padding: 14px; flex-direction: column; align-items: stretch; gap: 10px; }
+        body.mobile-mode .premium-select { min-width: 100%; }
+        body.mobile-mode .filter-tabs { width: 100%; justify-content: space-between; }
+        body.mobile-mode .filter-tab { flex: 1; text-align: center; padding: 8px 4px; font-size: 0.8rem; }
 
-        /* Automatyczne dopasowanie responsywne dla małych ekranów (RWD) */
         @media (max-width: 1024px) {
-            body:not(.desktop-mode) {
-                flex-direction: column;
-                padding-bottom: 80px;
-            }
+            body:not(.desktop-mode) { flex-direction: column; padding-bottom: 80px; }
             body:not(.desktop-mode) .sidebar { display: none !important; }
             body:not(.desktop-mode) .mobile-nav { display: block !important; }
             body:not(.desktop-mode) .main-content { margin-left: 0 !important; padding: 16px !important; width: 100% !important; }
@@ -282,7 +244,6 @@
 </head>
 <body>
 
-    <!-- PANEL BOCZNY (WIDOK KOMPUTEROWY) -->
     <div class="sidebar">
         <div class="sidebar-top">
             <div class="logo-area">📋 Holcim<span>Live</span></div>
@@ -299,11 +260,10 @@
         </div>
         <div class="sidebar-footer">
             <span>Status: Połączono 🟢</span>
-            <span>v5.5 Pro</span>
+            <span>v5.6 Pro</span>
         </div>
     </div>
 
-    <!-- DOLNY PASEK NAWIGACYJNY (WIDOK SMARTFON / IPHONE) -->
     <div class="mobile-nav">
         <ul class="mobile-nav-list">
             <li class="mobile-nav-item active" id="m-menu-grafik" onclick="switchView('grafik')">
@@ -324,12 +284,10 @@
         </ul>
     </div>
 
-    <!-- GŁÓWNY PANEL -->
     <div class="main-content">
         <div class="top-navbar">
             <div class="page-title"><h1 id="dynamic-title">Grafik Pracowników na Wybrany Dzień</h1></div>
             <div class="top-actions">
-                <!-- PRZEŁĄCZNIK WIDOKU TELEFON / KOMPUTER -->
                 <button class="view-mode-toggle" onclick="toggleViewMode()" id="view-mode-btn">📱 Widok: Auto</button>
                 <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 Ciemny</button>
                 <div class="current-time" id="live-clock">--:--:--</div>
@@ -337,7 +295,6 @@
             </div>
         </div>
 
-        <!-- CENTRUM ALERTÓW -->
         <div class="notification-center">
             <div class="notification-title">🔔 Pulpit Inteligentnych Alertów i Bezpieczeństwa Operacyjnego</div>
             <div class="notification-list" id="alerts-container">
@@ -345,7 +302,6 @@
             </div>
         </div>
 
-        <!-- PASEK KONTROLI FILTROWANIA -->
         <div class="controls-bar" id="view-controls">
             <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-muted);">👤 Pracownik:</div>
             <select id="employee-dropdown" class="premium-select" onchange="handleEmployeeSelect()"></select>
@@ -365,13 +321,11 @@
             </div>
         </div>
 
-        <!-- SELEKTOR DNIA Z KALENDARZA -->
         <div id="day-selector-wrapper" class="day-picker-box">
             <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary);">📅 Wybierz dzień z kalendarza:</div>
             <input type="date" id="main-date-picker" class="date-picker-input" onchange="handleCalendarDateChange()">
         </div>
 
-        <!-- SEKCJE ZAWARTOSCI -->
         <div id="view-grafik" class="view-section active">
             <div class="dashboard-grid" id="grafik-container">Ładowanie grafiku...</div>
         </div>
@@ -431,7 +385,7 @@
         let liveFilter = "ALL"; 
         let activeTab = "grafik";
         let myChart = null;
-        let viewMode = "auto"; // "auto", "desktop", "mobile"
+        let viewMode = "auto";
 
         function parseExcelDate(val) {
             if (!val) return null;
@@ -442,7 +396,6 @@
             return null;
         }
 
-        // PRZEŁĄCZNIK WIDOKU (KOMPUTER / TELEFON)
         function toggleViewMode() {
             const b = document.body;
             const btn = document.getElementById('view-mode-btn');
@@ -456,7 +409,6 @@
                 viewMode = "desktop";
                 b.classList.remove('mobile-mode');
                 b.classList.add('desktop-mode');
-                // Dla wymuszonego PC zmieniamy układy w CSS i przywracamy sidebar
                 b.style.flexDirection = "row";
                 document.querySelector('.sidebar').style.display = "flex";
                 document.querySelector('.mobile-nav').style.display = "none";
@@ -699,14 +651,45 @@
             });
         }
 
+        /* --- INTEGRACJA TEKSTOWEJ ZMIANY 1/2 --- */
         function getShiftConfig(code, loc) {
             const isK = loc === "Kujawy";
             let res = { s: null, e: null, label: code, avatar: "👤", isSpecial: false };
-            if (code === "1") { res.s = isK ? 6 : 7; res.e = isK ? 14 : 15; res.label = `🌅 Zmiana 1 (${isK ? "06-14" : "07-15"})`; res.avatar = "🌅"; }
-            else if (code === "2") { res.s = isK ? 14 : 15; res.e = isK ? 22 : 23; res.label = `🌇 Zmiana 2 (${isK ? "14-22" : "15-23"})`; res.avatar = "🌇"; }
-            else if (code === "3") { res.s = isK ? 22 : 23; res.e = isK ? 6 : 7; res.label = `🌃 Zmiana 3 (${isK ? "22-06" : "23-07"})`; res.avatar = "🌃"; }
-            else if (code === "UW") { res.label = "🏖️ Urlop Wypoczynkowy"; res.avatar = "🏖️"; res.isSpecial = true; }
-            else { res.label = "😴 Dzień Wolny"; res.avatar = "😴"; res.isSpecial = true; }
+            
+            if (code === "1") { 
+                res.s = isK ? 6 : 7; 
+                res.e = isK ? 14 : 15; 
+                res.label = `🌅 Zmiana 1 (${isK ? "06-14" : "07-15"})`; 
+                res.avatar = "🌅"; 
+            }
+            else if (code === "1/2") { 
+                res.s = 10; 
+                res.e = 18; 
+                res.label = "💻 Zmiana Biurowa (10-18)"; 
+                res.avatar = "💻"; 
+            }
+            else if (code === "2") { 
+                res.s = isK ? 14 : 15; 
+                res.e = isK ? 22 : 23; 
+                res.label = `🌇 Zmiana 2 (${isK ? "14-22" : "15-23"})`; 
+                res.avatar = "🌇"; 
+            }
+            else if (code === "3") { 
+                res.s = isK ? 22 : 23; 
+                res.e = isK ? 6 : 7; 
+                res.label = `🌃 Zmiana 3 (${isK ? "22-06" : "23-07"})`; 
+                res.avatar = "🌃"; 
+            }
+            else if (code === "UW") { 
+                res.label = "🏖️ Urlop Wypoczynkowy"; 
+                res.avatar = "🏖️"; 
+                res.isSpecial = true; 
+            }
+            else { 
+                res.label = "😴 Dzień Wolny"; 
+                res.avatar = "😴"; 
+                res.isSpecial = true; 
+            }
             return res;
         }
 
@@ -727,7 +710,6 @@
                 }));
             }
 
-            // 1. GRAFIK
             if(activeTab === 'grafik') {
                 const container = document.getElementById('grafik-container');
                 if(!container) return;
@@ -736,7 +718,12 @@
                 container.innerHTML = filtered.map(e => {
                     const activeCode = getCodeForDate(e.fullRowIndex, selectedScheduleDate);
                     const conf = getShiftConfig(activeCode, e.location);
-                    let badgeClass = ["1","2","3","uw"].includes(activeCode.toLowerCase()) ? `badge-${activeCode.toLowerCase()}` : 'badge-custom';
+                    
+                    let badgeClass = 'badge-custom';
+                    if (activeCode === "1") badgeClass = 'badge-1';
+                    else if (activeCode === "1/2") badgeClass = 'badge-1-2';
+                    else if (activeCode === "2") badgeClass = 'badge-2';
+                    else if (activeCode === "3") badgeClass = 'badge-3';
                     
                     let miniStripHtml = "";
                     for(let i=0; i<5; i++) {
@@ -781,7 +768,6 @@
                 }).join('');
             }
 
-            // 2. ODLICZANIE
             if(activeTab === 'odliczanie') {
                 const container = document.getElementById('odliczanie-container');
                 if(!container) return;
@@ -818,7 +804,6 @@
                 updateLiveTimers();
             }
 
-            // 3 & 4. TABELE RAPORTÓW
             if(activeTab === 'planowane' || activeTab === 'archiwum') {
                 const pBody = document.getElementById('planowane-table-body');
                 const aBody = document.getElementById('archiwum-table-body');
