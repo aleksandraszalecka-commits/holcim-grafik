@@ -1,0 +1,17 @@
+{
+  "short_name": "HolcimLive",
+  "name": "Holcim Live - Grafik i Urlopy",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2693/2693507.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#002949",
+  "theme_color": "#002949",
+  "display": "standalone",
+  "orientation": "portrait"
+}
