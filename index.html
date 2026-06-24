@@ -149,7 +149,7 @@
         .filter-tab.active { background: var(--bg-card); color: var(--text-main); box-shadow: var(--shadow-sm); }
 
         /* --- DAY PICKER --- */
-        .day-picker-box { background: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 24px; box-shadow: var(--shadow-sm); margin-bottom: 30px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .day-selector-wrapper { background: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 24px; box-shadow: var(--shadow-sm); margin-bottom: 30px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .date-picker-input { padding: 12px 24px; font-size: 1rem; color: var(--text-main); cursor: pointer; border-color: var(--border-color); font-weight: 700; width: 220px; text-align: center; }
 
         /* --- SECTIONS --- */
@@ -180,7 +180,7 @@
         .badge { padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
         .badge-1 { background: #e0f2fe; color: #0369a1; }
         .badge-1-2 { background: #fef3c7; color: #b45309; }
-        .badge-2 { background: #fef3c7; color: #d97706; }
+        .badge-2 { background: #fee2e2; color: #b91c1c; }
         .badge-3 { background: #f3e8ff; color: #7e22ce; }
         .badge-uw { background: #dcfce7; color: #15803d; }
         .badge-custom { background: #f1f5f9; color: #334155; }
@@ -260,7 +260,7 @@
         </div>
         <div class="sidebar-footer">
             <span>Status: Połączono 🟢</span>
-            <span>v5.6 Pro</span>
+            <span>v5.7 Pro</span>
         </div>
     </div>
 
@@ -321,7 +321,7 @@
             </div>
         </div>
 
-        <div id="day-selector-wrapper" class="day-picker-box">
+        <div id="day-selector-wrapper" class="day-selector-wrapper">
             <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary);">📅 Wybierz dzień z kalendarza:</div>
             <input type="date" id="main-date-picker" class="date-picker-input" onchange="handleCalendarDateChange()">
         </div>
@@ -519,7 +519,9 @@
                 }
 
                 if (colIndex !== -1 && globalRows[employeeFullRowIdx] && globalRows[employeeFullRowIdx][colIndex]) {
-                    return String(globalRows[employeeFullRowIdx][colIndex]).trim().toUpperCase();
+                    let textCode = String(globalRows[employeeFullRowIdx][colIndex]).trim();
+                    if (textCode === "1/2") return "1/2"; // Prewencja przed wymuszeniem toUpperCase() na unikalnym ciągu tekstowym
+                    return textCode.toUpperCase();
                 }
             } catch(e) {}
             return "W";
@@ -651,7 +653,7 @@
             });
         }
 
-        /* --- INTEGRACJA TEKSTOWEJ ZMIANY 1/2 --- */
+        /* --- DETEKCJA ZMIANY TEKSTOWEJ 1/2 (OD 10 DO 18) --- */
         function getShiftConfig(code, loc) {
             const isK = loc === "Kujawy";
             let res = { s: null, e: null, label: code, avatar: "👤", isSpecial: false };
@@ -662,7 +664,7 @@
                 res.label = `🌅 Zmiana 1 (${isK ? "06-14" : "07-15"})`; 
                 res.avatar = "🌅"; 
             }
-            else if (code === "1/2") { 
+            else if (code === "1/2" || code === "1/2 ") { 
                 res.s = 10; 
                 res.e = 18; 
                 res.label = "💻 Zmiana Biurowa (10-18)"; 
