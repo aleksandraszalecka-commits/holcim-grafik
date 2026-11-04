@@ -488,7 +488,18 @@
                 const dayRow = globalRows[6] || [];
                 globalDates = [];
                 for (let c = 2; c < dayRow.length; c++) {
-                    globalDates[c] = parseExcelDate(dayRow[c]) || String(dayRow[c]).trim();
+                    let pDate = parseExcelDate(dayRow[c]);
+                    if (pDate) {
+                        globalDates[c] = pDate;
+                    } else {
+                        let valStr = String(dayRow[c]).trim();
+                        let dayNum = parseInt(valStr, 10);
+                        if (!isNaN(dayNum)) {
+                            globalDates[c] = new Date(databaseScheduleDate.getFullYear(), databaseScheduleDate.getMonth(), dayNum);
+                        } else {
+                            globalDates[c] = valStr;
+                        }
+                    }
                 }
 
                 buildDataModels();
@@ -501,7 +512,8 @@
         function handleCalendarDateChange() {
             const pickerVal = document.getElementById('main-date-picker').value;
             if(pickerVal) {
-                selectedScheduleDate = new Date(pickerVal);
+                const parts = pickerVal.split('-');
+                selectedScheduleDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
                 renderAllViews();
             }
         }
@@ -518,9 +530,9 @@
                     if (typeof d === 'string' && d == tDay) { colIndex = c; break; }
                 }
 
-                if (colIndex !== -1 && globalRows[employeeFullRowIdx] && globalRows[employeeFullRowIdx][colIndex]) {
+                if (colIndex !== -1 && globalRows[employeeFullRowIdx] && globalRows[employeeFullRowIdx][colIndex] !== undefined) {
                     let textCode = String(globalRows[employeeFullRowIdx][colIndex]).trim();
-                    if (textCode === "1/2") return "1/2"; // Prewencja przed wymuszeniem toUpperCase() na unikalnym ciągu tekstowym
+                    if (textCode === "1/2") return "1/2"; 
                     return textCode.toUpperCase();
                 }
             } catch(e) {}
@@ -544,7 +556,7 @@
                         let code = globalRows[idx][c] ? String(globalRows[idx][c]).trim().toUpperCase() : "";
                         let dateObj = globalDates[c] instanceof Date ? globalDates[c] : new Date(databaseScheduleDate.getFullYear(), databaseScheduleDate.getMonth(), parseInt(globalDates[c], 10));
                         
-                        if (code === "UW" && !isNaN(dateObj.getTime())) {
+                        if (code === "UW" && dateObj instanceof Date && !isNaN(dateObj.getTime())) {
                             allVacations.push(dateObj);
                         }
                     }
@@ -653,7 +665,6 @@
             });
         }
 
-        /* --- DETEKCJA ZMIANY TEKSTOWEJ 1/2 (OD 10 DO 18) --- */
         function getShiftConfig(code, loc) {
             const isK = loc === "Kujawy";
             let res = { s: null, e: null, label: code, avatar: "👤", isSpecial: false };
@@ -726,6 +737,7 @@
                     else if (activeCode === "1/2") badgeClass = 'badge-1-2';
                     else if (activeCode === "2") badgeClass = 'badge-2';
                     else if (activeCode === "3") badgeClass = 'badge-3';
+                    else if (activeCode === "UW") badgeClass = 'badge-uw';
                     
                     let miniStripHtml = "";
                     for(let i=0; i<5; i++) {
@@ -735,7 +747,7 @@
                         let dayCode = getCodeForDate(e.fullRowIndex, tDate);
                         miniStripHtml += `
                             <div class="mini-day-cell ${i===0 ? 'active-preview' : ''}">
-                                <div>${i===0 ? 'Dziś' : dayShort}</div>
+                                <div>${i===0 ? 'Wybrany' : dayShort}</div>
                                 <span class="m-code">${dayCode || 'W'}</span>
                             </div>
                         `;
@@ -768,6 +780,7 @@
                         </div>
                     `;
                 }).join('');
+                updateLiveTimers();
             }
 
             if(activeTab === 'odliczanie') {
@@ -778,7 +791,11 @@
                 container.innerHTML = filtered.map(e => {
                     let periods = calculateVacationPeriods(e.vacations, e.fullRowIndex);
                     let dzisMs = now.getTime();
-                    let aktualneWolne = periods.find(p => dzisMs >= p.start.setHours(0,0,0,0) && dzisMs <= (p.end.setHours(23,59,59,999)));
+                    let aktualneWolne = periods.find(p => {
+                        let s = new Date(p.start).setHours(0,0,0,0);
+                        let eMs = new Date(p.end).setHours(23,59,59,999);
+                        return dzisMs >= s && dzisMs <= eMs;
+                    });
                     let jestNaWolnymDzis = !!aktualneWolne;
                     
                     return `
@@ -821,7 +838,7 @@
                         let isFuture = p.end.getTime() >= todayReset;
                         let startStr = p.start.toLocaleDateString('pl-PL');
                         let endStr = p.end.toLocaleDateString('pl-PL');
-                        let rangeStr = (startStr === endStr) ? `📅 ${startStr}` : ` od ${startStr} do ${endStr}`;
+                        let rangeStr = (startStr === endStr) ? `📅 ${startStr}` : `od ${startStr} do ${endStr}`;
                         
                         if(isFuture) {
                             totalPlanDays += p.daysCount;
@@ -895,7 +912,7 @@
                             let end = new Date(selectedScheduleDate); end.setHours(conf.e, 0, 0, 0);
                             if (conf.s >= conf.e) {
                                 if (now.getHours() >= conf.s) end.setDate(end.getDate() + 1);
-                                else start.setDate(start.setDate() - 1);
+                                else start.setDate(start.getDate() - 1);
                             }
                             const nowMs = now.getTime();
                             if (nowMs >= start.getTime() && nowMs < end.getTime()) {
@@ -923,7 +940,11 @@
 
                     let periods = calculateVacationPeriods(e.vacations, e.fullRowIndex);
                     let nowMs = now.getTime();
-                    let aktualnyOkres = periods.find(p => nowMs >= new Date(p.start).setHours(0,0,0,0) && nowMs <= new Date(p.end).setHours(23,59,59,999));
+                    let aktualnyOkres = periods.find(p => {
+                        let s = new Date(p.start).setHours(0,0,0,0);
+                        let eMs = new Date(p.end).setHours(23,59,59,999);
+                        return nowMs >= s && nowMs <= eMs;
+                    });
 
                     if(aktualnyOkres) {
                         let koniecWolnegoMs = new Date(aktualnyOkres.end).setHours(23,59,59,999);
