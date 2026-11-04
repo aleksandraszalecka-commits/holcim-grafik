@@ -260,7 +260,7 @@
         </div>
         <div class="sidebar-footer">
             <span>Status: Połączono 🟢</span>
-            <span>v5.7 Pro</span>
+            <span>v5.8 Pro</span>
         </div>
     </div>
 
@@ -539,40 +539,50 @@
             return "W";
         }
 
+        /* --- SKANOWANIE WSZYSTKICH PRACONIKÓW DYNAMICZNIE --- */
         function buildDataModels() {
             parsedEmployees = [];
-            const malogoszczRows = [9, 11, 13, 17, 21, 23, 25];
-            const kujawyRows = [27, 29, 31, 33, 35, 37];
+            let currentSectionLocation = "Małogoszcz";
 
-            const processRow = (rowNum, loc) => {
-                try {
-                    const idx = rowNum - 1;
-                    if (!globalRows[idx] || !globalRows[idx][1]) return;
-                    
-                    const name = String(globalRows[idx][1]).trim();
+            for (let idx = 7; idx < globalRows.length; idx++) {
+                let row = globalRows[idx];
+                if (!row) continue;
+
+                let col0 = row[0] ? String(row[0]).trim().toUpperCase() : "";
+                let col1 = row[1] ? String(row[1]).trim() : "";
+
+                // Wykrywanie nagłówka zakładu w arkuszu
+                if (col0.includes("KUJAWY") || col1.toUpperCase().includes("KUJAWY")) {
+                    currentSectionLocation = "Kujawy";
+                    continue;
+                }
+                if (col0.includes("MAŁOGOSZCZ") || col1.toUpperCase().includes("MAŁOGOSZCZ")) {
+                    currentSectionLocation = "Małogoszcz";
+                    continue;
+                }
+
+                // Odczyt pracownika, jeśli wiersz zawiera imię i nazwisko
+                if (col1 !== "" && !col1.toUpperCase().includes("ZAKŁAD") && !col1.toUpperCase().includes("STANOWISKO") && !col1.toUpperCase().includes("SZAFA")) {
                     let allVacations = [];
-                    
+
                     for (let c = 2; c < globalDates.length; c++) {
-                        let code = globalRows[idx][c] ? String(globalRows[idx][c]).trim().toUpperCase() : "";
+                        let code = row[c] ? String(row[c]).trim().toUpperCase() : "";
                         let dateObj = globalDates[c] instanceof Date ? globalDates[c] : new Date(databaseScheduleDate.getFullYear(), databaseScheduleDate.getMonth(), parseInt(globalDates[c], 10));
-                        
+
                         if (code === "UW" && dateObj instanceof Date && !isNaN(dateObj.getTime())) {
                             allVacations.push(dateObj);
                         }
                     }
 
                     parsedEmployees.push({
-                        id: `${loc}-${rowNum}`,
-                        name: name,
-                        location: loc,
-                        vacations: allVacations.sort((a,b) => a.getTime() - b.getTime()),
+                        id: `emp-${idx}`,
+                        name: col1,
+                        location: currentSectionLocation,
+                        vacations: allVacations.sort((a, b) => a.getTime() - b.getTime()),
                         fullRowIndex: idx
                     });
-                } catch(e) {}
-            };
-
-            malogoszczRows.forEach(r => processRow(r, "Małogoszcz"));
-            kujawyRows.forEach(r => processRow(r, "Kujawy"));
+                }
+            }
 
             populateDropdowns();
             runCollisionDetector();
@@ -912,7 +922,7 @@
                             let end = new Date(selectedScheduleDate); end.setHours(conf.e, 0, 0, 0);
                             if (conf.s >= conf.e) {
                                 if (now.getHours() >= conf.s) end.setDate(end.getDate() + 1);
-                                else start.setDate(start.getDate() - 1);
+                                else start.setDate(start.setDate() - 1);
                             }
                             const nowMs = now.getTime();
                             if (nowMs >= start.getTime() && nowMs < end.getTime()) {
